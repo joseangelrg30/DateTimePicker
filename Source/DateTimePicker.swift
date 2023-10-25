@@ -383,6 +383,28 @@ public protocol DateTimePickerDelegate: AnyObject {
         }
     }
     
+    private func hexStringToUIColor (hex:String) -> UIColor {
+        var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        
+        if (cString.hasPrefix("#")) {
+            cString.remove(at: cString.startIndex)
+        }
+        
+        if ((cString.count) != 6) {
+            return UIColor.gray
+        }
+        
+        var rgbValue:UInt64 = 0
+        Scanner(string: cString).scanHexInt64(&rgbValue)
+        
+        return UIColor(
+            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+            alpha: CGFloat(1.0)
+        )
+    }
+    
     private func configureView() {
         
         // content view
@@ -444,7 +466,11 @@ public protocol DateTimePickerDelegate: AnyObject {
         // done button
         doneButton.setTitle(doneButtonTitle, for: .normal)
         doneButton.setTitleColor(.white, for: .normal)
-        doneButton.backgroundColor = doneBackgroundColor ?? darkColor.withAlphaComponent(0.5)
+        //doneButton.backgroundColor = doneBackgroundColor ?? darkColor.withAlphaComponent(0.5)
+        let firstColor = hexStringToUIColor(hex: "#000000")
+        let secondColor = hexStringToUIColor(hex: "#6E6E6E")
+
+        doneButton.applyGradient(colours: [firstColor, secondColor])
         doneButton.titleLabel?.font = customFontSetting.doneButtonFont
         doneButton.layer.cornerRadius = doneButton.frame.height / 2
         doneButton.layer.masksToBounds = true
@@ -667,5 +693,24 @@ private extension DateTimePicker {
         let haptic = UINotificationFeedbackGenerator()
         haptic.prepare()
         haptic.notificationOccurred(.success)
+    }
+}
+
+extension UIButton {
+
+    func applyGradient(colours: [UIColor], vertical: Bool = false) -> CAGradientLayer {
+        return self.applyGradient(colours: colours, vertical: vertical, locations: nil)
+    }
+
+
+    func applyGradient(colours: [UIColor], vertical: Bool = false, locations: [NSNumber]?) -> CAGradientLayer {
+        let gradient: CAGradientLayer = CAGradientLayer()
+        gradient.frame = self.bounds
+        gradient.colors = colours.map { $0.cgColor }
+        gradient.startPoint = CGPoint.zero
+        gradient.endPoint = vertical ? CGPoint(x: 0, y: 1) : CGPoint(x: 1, y: 0)
+        gradient.locations = locations
+        self.layer.insertSublayer(gradient, at: 0)
+        return gradient
     }
 }
