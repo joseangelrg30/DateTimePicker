@@ -446,7 +446,7 @@ public protocol DateTimePickerDelegate: AnyObject {
         doneButton.setTitleColor(.white, for: .normal)
         doneButton.backgroundColor = doneBackgroundColor ?? darkColor.withAlphaComponent(0.5)
         doneButton.titleLabel?.font = customFontSetting.doneButtonFont
-        doneButton.layer.cornerRadius = 3
+        doneButton.layer.cornerRadius = doneButton.frame.height / 2
         doneButton.layer.masksToBounds = true
         doneButton.addTarget(self, action: #selector(DateTimePicker.donePicking(sender:)), for: .touchUpInside)
         
